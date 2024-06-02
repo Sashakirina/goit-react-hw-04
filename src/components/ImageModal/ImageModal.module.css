@@ -8,17 +8,16 @@
 }
 .modal {
 	position: absolute;
-	top: 20%;
-	left: 20%;
-	right: 20%;
-	bottom: 20%;
+	top: 10%;
+	left: 10%;
+	right: 10%;
+	bottom: 10%;
 	background: rgba(26, 25, 25, 0.75);
 	overflow: auto;
 	-webkit-overflow-scrolling: touch;
 	border-radius: 4px;
 	outline: none;
 	padding: 20px;
-	max-width: 1400px;
 }
 
 .modal::-webkit-scrollbar-track {
@@ -45,7 +44,7 @@
 
 .picture {
 	align-self: center;
-	max-width: 70%;
+	max-width: 80%;
 	padding: auto;
 }
 
