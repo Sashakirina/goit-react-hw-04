@@ -1,35 +1,78 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import "./App.css";
+import SearchBar from "./components/SearchBar/SearchBar";
+import { getPictures } from "./api/searchFetch";
+import ImageGallery from "./components/ImageGallery/ImageGallery";
+import Loader from "./components/Loader/Loader";
+import ErrorMessage from "./components/ErrorMessage/ErrorMessage";
+import LoadMoreBtn from "./components/LoadMoreBtn/LoadMoreBtn";
+import ImageModal from "./components/ImageModal/ImageModal";
 
 function App() {
-  const [count, setCount] = useState(0)
+	const [query, setQuery] = useState("");
+	const [page, setPage] = useState(1);
+	const [pictures, setPictures] = useState([]);
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState(false);
+	const [modalIsOpen, setIsOpen] = useState(false);
+	const [selectedImage, setSelectedImage] = useState("");
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+	useEffect(() => {
+		const getData = async () => {
+			try {
+				setError(false);
+				setLoading(true);
+				const { data } = await getPictures(query, page);
+				setPictures((prevPictures) => [...prevPictures, ...data.results]);
+			} catch (error) {
+				setError(true);
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		query && getData();
+	}, [query, page]);
+
+	const handleSearch = async (searchQuery) => {
+		setQuery(searchQuery);
+		setPictures([]);
+		setPage(1);
+	};
+
+	const handleLoadMore = async () => {
+		setPage(page + 1);
+	};
+
+	const openModal = (id) => {
+		const selectedImage = pictures.find((picture) => picture.id === id);
+		setSelectedImage(selectedImage);
+		setIsOpen(true);
+	};
+
+	const closeModal = () => {
+		setIsOpen(false);
+		setSelectedImage("");
+	};
+
+	return (
+		<>
+			<SearchBar onSearch={handleSearch} />
+			{loading && <Loader />}
+			{pictures.length > 0 && (
+				<ImageGallery pictures={pictures} handleOpenModal={openModal} />
+			)}
+			{modalIsOpen && selectedImage && (
+				<ImageModal
+					modalIsOpen={modalIsOpen}
+					pictures={selectedImage}
+					closeModal={closeModal}
+				/>
+			)}
+			{error && <ErrorMessage />}
+			{pictures.length > 0 && <LoadMoreBtn handleLoadMore={handleLoadMore} />}
+		</>
+	);
 }
 
-export default App
+export default App;
